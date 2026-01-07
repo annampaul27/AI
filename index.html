@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Tic Tac Toe - Human / AI</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <style>
+    :root {
+      --bg: #1e1e2f;
+      --grid: #33334d;
+      --x-color: #ff6b6b;
+      --o-color: #4ecdc4;
+      --text: #f7fff7;
+      --accent: #ffe66d;
+      --win: #2ecc71;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      text-align: center;
+      padding: 20px;
+      max-width: 420px;
+      width: 100%;
+    }
+
+    h1 {
+      margin-bottom: 8px;
+      color: var(--accent);
+    }
+
+    .subtitle {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-bottom: 16px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 6px;
+      margin: 16px auto;
+      max-width: 320px;
+    }
+
+    .cell {
+      width: 100px;
+      height: 100px;
+      background: var(--grid);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.5rem;
+      cursor: pointer;
+      user-select: none;
+      transition: background 0.15s ease, transform 0.05s ease;
+    }
+
+    .cell:hover {
+      background: #444466;
+    }
+
+    .cell:active {
+      transform: scale(0.97);
+    }
+
+    .cell.x {
+      color: var(--x-color);
+    }
+
+    .cell.o {
+      color: var(--o-color);
+    }
+
+    .cell.win {
+      background: var(--win);
+    }
+
+    .status {
+      margin-top: 10px;
+      font-size: 1rem;
+      min-height: 1.4em;
+    }
+
+    .scoreboard {
+      margin-top: 10px;
+      font-size: 0.95rem;
+      color: var(--accent);
+    }
+
+    .controls {
+      margin-top: 16px;
+      display: flex;
+      gap: 8px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: none;
+      padding: 8px 12px;
+      border-radius: 4px;
+      font-size: 0.9rem;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #000;
+    }
+
+    .btn-secondary {
+      background: #ffaf40;
+      color: #000;
+    }
+
+    .btn-danger {
+      background: #ff7675;
+      color: #000;
+    }
+
+    .mode-label {
+      margin-top: 8px;
+      font-size: 0.85rem;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tic Tac Toe</h1>
+    <div class="subtitle">Human vs Human or Human vs AI (Minimax)</div>
+
+    <div class="board" id="board"></div>
+
+    <div class="status" id="status"></div>
+    <div class="scoreboard" id="scoreboard">X: 0 | O: 0 | Draws: 0</div>
+    <div class="mode-label" id="modeLabel">Mode: Human vs Human</div>
+
+    <div class="controls">
+      <button class="btn-primary" id="replayBtn">Replay</button>
+      <button class="btn-secondary" id="toggleAiBtn">Toggle AI</button>
+      <button class="btn-danger" id="resetScoresBtn">Reset Scores</button>
+    </div>
+  </div>
+
+  <script>
+    // --- Game state ---
+    const boardEl = document.getElementById("board");
+    const statusEl = document.getElementById("status");
+    const scoreboardEl = document.getElementById("scoreboard");
+    const modeLabelEl = document.getElementById("modeLabel");
+
+    const replayBtn = document.getElementById("replayBtn");
+    const toggleAiBtn = document.getElementById("toggleAiBtn");
+    const resetScoresBtn = document.getElementById("resetScoresBtn");
+
+    let board = Array(9).fill(null);
+    let currentPlayer = "X";
+    let gameOver = false;
+
+    let vsAI = false;
+    const humanSymbol = () => "X";               // human is always X here
+    const aiSymbol = () => "O";                  // AI is always O
+
+    let scores = { X: 0, O: 0, draws: 0 };
+
+    // Create cells
+    const cells = [];
+    for (let i = 0; i < 9; i++) {
+      const cell = document.createElement("div");
+      cell.classList.add("cell");
+      cell.dataset.index = i.toString();
+      cell.addEventListener("click", () => handleCellClick(i));
+      boardEl.appendChild(cell);
+      cells.push(cell);
+    }
+
+    function updateStatus(text) {
+      statusEl.textContent = text;
+    }
+
+    function updateScoreboard() {
+      scoreboardEl.textContent = `X: ${scores.X} | O: ${scores.O} | Draws: ${scores.draws}`;
+    }
+
+    function updateModeLabel() {
+      modeLabelEl.textContent = vsAI
+        ? "Mode: Human vs AI (X vs O)"
+        : "Mode: Human vs Human";
+    }
+
+    function resetBoard() {
+      board = Array(9).fill(null);
+      gameOver = false;
+      currentPlayer = "X";
+      cells.forEach((cell) => {
+        cell.textContent = "";
+        cell.classList.remove("x", "o", "win");
+      });
+      updateStatus(`Turn: ${currentPlayer}`);
+    }
+
+    function handleCellClick(index) {
+      if (gameOver || board[index] !== null) return;
+
+      // Human move
+      if (vsAI && currentPlayer === aiSymbol()) return;
+
+      makeMove(index, currentPlayer);
+
+      if (checkGameEnd()) return;
+
+      // Next turn
+      currentPlayer = currentPlayer === "X" ? "O" : "X";
+      updateStatus(`Turn: ${currentPlayer}`);
+
+      // AI move if vsAI and now AI's turn
+      if (vsAI && currentPlayer === aiSymbol() && !gameOver) {
+        setTimeout(aiMove, 250);
+      }
+    }
+
+    function makeMove(index, player) {
+      board[index] = player;
+      const cell = cells[index];
+      cell.textContent = player;
+      cell.classList.add(player.toLowerCase());
+    }
+
+    function checkWinner(b) {
+      const lines = [
+        [0, 1, 2],
+        [3, 4, 5],
+        [6, 7, 8],
+        [0, 3, 6],
+        [1, 4, 7],
+        [2, 5, 8],
+        [0, 4, 8],
+        [2, 4, 6],
+      ];
+
+      for (const [a, c, d] of lines) {
+        if (b[a] && b[a] === b[c] && b[a] === b[d]) {
+          return { winner: b[a], line: [a, c, d] };
+        }
+      }
+      return null;
+    }
+
+    function isDraw(b) {
+      return b.every((cell) => cell !== null);
+    }
+
+    function highlightWinningLine(line) {
+      line.forEach((i) => cells[i].classList.add("win"));
+    }
+
+    function checkGameEnd() {
+      const winInfo = checkWinner(board);
+      if (winInfo) {
+        gameOver = true;
+        highlightWinningLine(winInfo.line);
+        scores[winInfo.winner] += 1;
+        updateScoreboard();
+        updateStatus(`Player ${winInfo.winner} wins!`);
+        return true;
+      } else if (isDraw(board)) {
+        gameOver = true;
+        scores.draws += 1;
+        updateScoreboard();
+        updateStatus(`It's a draw!`);
+        return true;
+      }
+      return false;
+    }
+
+    // --- Minimax AI ---
+    function aiMove() {
+      if (gameOver) return;
+
+      const best = findBestMove(board, aiSymbol(), humanSymbol());
+      if (best.index !== -1) {
+        makeMove(best.index, aiSymbol());
+      }
+
+      if (checkGameEnd()) return;
+
+      currentPlayer = humanSymbol();
+      updateStatus(`Turn: ${currentPlayer}`);
+    }
+
+    function findBestMove(b, ai, human) {
+      let bestScore = -Infinity;
+      let bestIndex = -1;
+
+      for (let i = 0; i < 9; i++) {
+        if (b[i] === null) {
+          b[i] = ai;
+          const score = minimax(b, false, ai, human);
+          b[i] = null;
+          if (score > bestScore) {
+            bestScore = score;
+            bestIndex = i;
+          }
+        }
+      }
+
+      return { index: bestIndex, score: bestScore };
+    }
+
+    function minimax(b, isMaximizing, ai, human) {
+      const winInfo = checkWinner(b);
+      if (winInfo) {
+        if (winInfo.winner === ai) return 1;
+        if (winInfo.winner === human) return -1;
+      }
+      if (isDraw(b)) return 0;
+
+      if (isMaximizing) {
+        let bestScore = -Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (b[i] === null) {
+            b[i] = ai;
+            const score = minimax(b, false, ai, human);
+            b[i] = null;
+            bestScore = Math.max(bestScore, score);
+          }
+        }
+        return bestScore;
+      } else {
+        let bestScore = Infinity;
+        for (let i = 0; i < 9; i++) {
+          if (b[i] === null) {
+            b[i] = human;
+            const score = minimax(b, true, ai, human);
+            b[i] = null;
+            bestScore = Math.min(bestScore, score);
+          }
+        }
+        return bestScore;
+      }
+    }
+
+    // --- Buttons ---
+    replayBtn.addEventListener("click", resetBoard);
+
+    toggleAiBtn.addEventListener("click", () => {
+      vsAI = !vsAI;
+      updateModeLabel();
+      resetBoard();
+    });
+
+    resetScoresBtn.addEventListener("click", () => {
+      scores = { X: 0, O: 0, draws: 0 };
+      updateScoreboard();
+      resetBoard();
+    });
+
+    // Initial render
+    updateModeLabel();
+    resetBoard();
+  </script>
+</body>
+</html>
