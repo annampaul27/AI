@@ -16,7 +16,7 @@ The computer opponent in this project uses the **minimax algorithm**, a classic 
   - AI win: `+1`  
   - Human win: `-1`  
   - Draw: `0`  
-- These scores are used by minimax to evaluate which moves are good or bad for the AI.[3][1]
+- These scores are used by minimax to evaluate which moves are good or bad for the AI.
 
 ### Minimax search
 
@@ -26,10 +26,10 @@ At each AI turn, the algorithm:
 2. For each move, it **simulates the move** and then **recursively explores** all possible responses from the human player and subsequent moves until reaching a win, loss, or draw.  
 3. During recursion:  
    - When it is the AI’s turn, minimax chooses the **maximum** score (trying to maximize the AI’s outcome).  
-   - When it is the human’s turn, minimax chooses the **minimum** score (assuming the human plays optimally to minimize the AI’s outcome).[2][4]
-4. After exploring the entire game tree from the current position, the AI picks the move with the **best score** (highest minimax value), making it effectively **unbeatable** in Tic‑Tac‑Toe.[5][1]
+   - When it is the human’s turn, minimax chooses the **minimum** score (assuming the human plays optimally to minimize the AI’s outcome).
+4. After exploring the entire game tree from the current position, the AI picks the move with the **best score** (highest minimax value), making it effectively **unbeatable** in Tic‑Tac‑Toe.
 
-In pseudocode form, the logic follows the typical pattern: evaluate terminal states, recursively evaluate all children states, then return the max score when it is the AI’s turn and the min score when it is the human’s turn.[1][2]
+In pseudocode form, the logic follows the typical pattern: evaluate terminal states, recursively evaluate all children states, then return the max score when it is the AI’s turn and the min score when it is the human’s turn.
 
 ### Why this feels like “AI”
 
@@ -39,8 +39,6 @@ Even though the minimax algorithm is deterministic and rule‑based, it models *
 - Assuming an optimal opponent and planning moves that **avoid losing states** and **force draws or wins** wherever possible.  
 - Producing human‑like “smart” behavior such as blocking imminent wins and setting up unavoidable forks.
 
-For a small game like Tic‑Tac‑Toe, minimax can explore the full game tree quickly, making it an excellent introduction to **AI for games**, adversarial search, and optimal decision‑making.[6][7][1]
+For a small game like Tic‑Tac‑Toe, minimax can explore the full game tree quickly, making it an excellent introduction to **AI for games**, adversarial search, and optimal decision‑making.
 
-[18](https://github.com/blaz-cerpnjak/tictactoe-minimax)
-[19](https://dev.to/hodeware/building-an-impossible-tic-tac-toe-with-minimax-and-lemonadejs-52df)
-[20](https://github.com/vineetjoshi253/TicTacToe-MiniMax)
+
