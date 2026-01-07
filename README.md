@@ -5,9 +5,9 @@ Here is a README section you can add under a header like “How the AI Works (Mi
 
 ***
 
-## How the AI Opponent Works (Minimax)
+## How the AI (Minimax Algorithm) Opponent Works 
 
-The computer opponent in this project uses the **minimax algorithm**, a classic game‑tree search technique from game theory that guarantees **optimal play** in turn‑based, zero‑sum games like Tic‑Tac‑Toe.[1][2]
+The computer opponent in this project uses the **minimax algorithm**, a classic game‑tree search technique from game theory that guarantees **optimal play** in turn‑based, zero‑sum games like Tic‑Tac‑Toe.
 
 ### Game state and scoring
 
